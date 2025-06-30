@@ -26,14 +26,6 @@ export const Navigation = ({ currentSection, onSectionChange }: NavigationProps)
     }
   };
 
-  const handleMenuItemClick = (itemId: string) => {
-    if (itemId === 'mindgames') {
-      navigate('/mindgames');
-    } else {
-      onSectionChange(itemId);
-    }
-  };
-
   const menuItems = [
     { id: "home", label: "Home", icon: Heart },
     { id: "assessment", label: "Mental Health Assessment", icon: Brain },
@@ -60,7 +52,7 @@ export const Navigation = ({ currentSection, onSectionChange }: NavigationProps)
             {menuItems.map((item) => (
               <button
                 key={item.id}
-                onClick={() => handleMenuItemClick(item.id)}
+                onClick={() => onSectionChange(item.id)}
                 className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-all ${
                   currentSection === item.id
                     ? "bg-green-100 text-green-700"
@@ -132,7 +124,7 @@ export const Navigation = ({ currentSection, onSectionChange }: NavigationProps)
               <button
                 key={item.id}
                 onClick={() => {
-                  handleMenuItemClick(item.id);
+                  onSectionChange(item.id);
                   setIsMenuOpen(false);
                 }}
                 className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-all ${

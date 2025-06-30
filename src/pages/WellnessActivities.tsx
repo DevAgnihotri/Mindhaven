@@ -27,7 +27,7 @@ import { RhythmTapGame } from '../components/wellness/games/RhythmTapGame';
 import { WordFlowGame } from '../components/wellness/games/WordFlowGame';
 import { MindfulMazeGame } from '../components/wellness/games/MindfulMazeGame';
 import { useLocalStorage } from '../hooks/useLocalStorage';
-import { Mood, Game, GameSession, UserProgress } from '../types/wellness-advanced';
+import { Mood, Game, GameSession, UserProgress } from '../types/wellness';
 
 type AppState = 'home' | 'mood-select' | 'game-select' | 'playing' | 'complete' | 'progress';
 
@@ -37,7 +37,6 @@ const WellnessActivities: React.FC = () => {
   const [selectedMood, setSelectedMood] = useState<Mood | null>(null);
   const [selectedGame, setSelectedGame] = useState<Game | null>(null);
   const [currentScore, setCurrentScore] = useState(0);
-  const [isMascotVisible, setIsMascotVisible] = useState(true);
   
   const [sessions, setSessions] = useLocalStorage<GameSession[]>('mindgames-sessions', []);
   const [userProgress, setUserProgress] = useLocalStorage<UserProgress>('mindgames-progress', {
@@ -68,8 +67,8 @@ const WellnessActivities: React.FC = () => {
         gameType: selectedGame.name,
         duration: 5,
         score,
-        timestamp: new Date(),
-        effectiveness: Math.floor(Math.random() * 3) + 3
+        timestamp: new Date().toISOString(),
+        stressReduction: Math.floor(Math.random() * 3) + 3
       };
       
       setSessions(prev => [newSession, ...prev]);
@@ -77,7 +76,7 @@ const WellnessActivities: React.FC = () => {
         ...prev,
         totalSessions: prev.totalSessions + 1,
         averageStressReduction: Math.round(
-          (prev.averageStressReduction * prev.totalSessions + newSession.effectiveness) / 
+          (prev.averageStressReduction * prev.totalSessions + newSession.stressReduction) / 
           (prev.totalSessions + 1)
         )
       }));
@@ -238,15 +237,16 @@ const WellnessActivities: React.FC = () => {
 
           {appState === 'mood-select' && (
             <MoodSelector
-              selectedMood={selectedMood}
               onMoodSelect={handleMoodSelect}
+              onBack={() => setAppState('home')}
             />
           )}
 
           {appState === 'game-select' && selectedMood && (
             <GameSelector
-              selectedMood={selectedMood}
+              mood={selectedMood}
               onGameSelect={handleGameSelect}
+              onBack={() => setAppState('mood-select')}
             />
           )}
 
@@ -257,15 +257,16 @@ const WellnessActivities: React.FC = () => {
               mood={selectedMood}
               game={selectedGame}
               score={currentScore}
-              onRestart={() => setAppState('game-select')}
-              onHome={handleSessionEnd}
+              onPlayAgain={() => setAppState('game-select')}
+              onNewSession={() => setAppState('mood-select')}
+              onFinish={handleSessionEnd}
             />
           )}
 
           {appState === 'progress' && (
             <ProgressDashboard
               sessions={sessions}
-              progress={userProgress}
+              userProgress={userProgress}
               onBack={() => setAppState('home')}
             />
           )}
@@ -273,13 +274,7 @@ const WellnessActivities: React.FC = () => {
       </div>
 
       {/* Wellness Mascot */}
-      <WellnessMascot 
-        userLevel={Math.floor(userProgress.totalSessions / 5) + 1}
-        currentMood={selectedMood?.name}
-        recentScore={currentScore}
-        isVisible={isMascotVisible}
-        onToggle={() => setIsMascotVisible(!isMascotVisible)}
-      />
+      <WellnessMascot />
     </div>
   );
 };
